@@ -151,9 +151,77 @@ Software rainbow and breathing effects run until you press **Ctrl-C**.
 
 ---
 
+## GPU Load Monitor
+
+`gpu_monitor.py` runs continuously and maps GPU utilization to a live color gradient on any zone:
+
+| Load | Color |
+|------|-------|
+| 0%   | Deep blue `#0066FF` |
+| 25%  | Cyan `#00FFDD` |
+| 50%  | Green `#00FF44` |
+| 75%  | Yellow `#AAFF00` |
+| 90%+ | Orange → Red `#FF4400` → `#FF0000` |
+
+GPU type is auto-detected (NVIDIA via `nvidia-smi`, AMD/Intel via sysfs). Readings are averaged over a configurable window to prevent flickering. Lights turn off cleanly on Ctrl-C.
+
+### AlienWare x17 R1 recommended usage
+
+The x17 R1 ships with an NVIDIA discrete GPU (RTX 3070/3080). The most useful configurations:
+
+```bash
+# Keyboard as a live GPU strain gauge — responsive 1s updates
+python gpu_monitor.py --zone keyboard --gpu nvidia --interval 1
+
+# Lightbar only — subtle background indicator while you work
+python gpu_monitor.py --zone lightbar --gpu nvidia --interval 2
+
+# All zones at once for maximum visibility during gaming/rendering
+python gpu_monitor.py --zone all --gpu nvidia --interval 1 --smooth 4
+
+# High-frequency polling with heavier smoothing — fluid, no flicker
+python gpu_monitor.py --zone keyboard --gpu nvidia --interval 0.5 --smooth 6
+```
+
+### General examples
+
+```bash
+# Basic — auto-detect GPU, control all zones, poll every 2s
+python gpu_monitor.py
+
+# Custom zone and interval
+python gpu_monitor.py --zone keyboard --interval 1
+
+# Force GPU type, increase smoothing window
+python gpu_monitor.py --gpu nvidia --smooth 5
+
+# Just the lightbar as a subtle strain indicator
+python gpu_monitor.py --zone lightbar --interval 0.5
+```
+
+What it looks like in the terminal:
+
+```
+  GPU  73.4%  ████████████████████████████░░░░░░░░░░░░  #77FF00
+```
+
+### Options
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--zone` / `-z` | `all` | Zone(s) to control |
+| `--gpu` / `-g` | auto | `nvidia`, `amd`, or `intel` |
+| `--interval` / `-i` | `2.0` | Poll interval in seconds |
+| `--smooth` / `-s` | `3` | Readings to average (reduces flicker) |
+| `--host` | `localhost` | OpenRGB SDK host |
+| `--port` / `-p` | `6742` | OpenRGB SDK port |
+
+---
+
 ## Files
 
-| File                | Description                                      |
-|---------------------|--------------------------------------------------|
-| `alienware_rgb.py`  | Main script — standalone, no heavy dependencies  |
-| `setup.sh`          | One-time setup for Linux (pip install + symlink) |
+| File                | Description                                           |
+|---------------------|-------------------------------------------------------|
+| `alienware_rgb.py`  | Main RGB controller — standalone, no heavy deps       |
+| `gpu_monitor.py`    | GPU load → live color gradient monitor                |
+| `setup.sh`          | One-time setup for Linux (pip install + symlink)      |
