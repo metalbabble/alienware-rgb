@@ -1,6 +1,6 @@
 # alienware-rgb
 
-A Linux (and Windows) Python CLI for controlling RGB lighting zones on the **AlienWare x17 R1** — keyboard, alien logo, lightbar, power button, touchpad, and more.
+A Linux (and Windows) Python CLI for controlling RGB lighting zones on the **AlienWare x17 R1** — keyboard, alien logo, lightbar, power button, touchpad, and more. May work on other Alienware devices, but designed specifically for the x17 laptop.
 
 Supports static colors, rainbow cycling, and breathing effects. Can be run interactively or fully from the command line for scripting.
 
