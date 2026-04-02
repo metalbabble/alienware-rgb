@@ -333,7 +333,8 @@ def main():
     if not zones:
         print(f"\n  Error: No zones matched '{args.zone}'. Run alienware_rgb.py --list-zones.")
         sys.exit(1)
-    print(f"  Zones: {', '.join(f\"{z['device_name']} › {z['zone_name']}\" for z in zones)}")
+    zone_labels = ', '.join(f"{z['device_name']} › {z['zone_name']}" for z in zones)
+    print(f"  Zones: {zone_labels}")
     print(f"  Interval: {args.interval}s   Smoothing: {args.smooth} samples")
 
     monitor(zones, read_gpu, args.interval, args.smooth)
