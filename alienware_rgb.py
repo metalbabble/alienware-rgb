@@ -48,6 +48,8 @@ ZONE_KEYWORDS: Dict[str, List[str]] = {
     "lightbar":  ["lightbar", "light bar", "bar", "chassis"],
     "power":     ["power"],
     "touchpad":  ["touchpad", "touch pad"],
+    # Matches the Dell G Series LED Controller (all laptop zones, excludes peripherals)
+    "laptop":    ["dell g series", "dell g-series", "alienware led"],
 }
 
 NAMED_COLORS: Dict[str, str] = {
@@ -156,17 +158,39 @@ def list_all_zones(client: "OpenRGBClient") -> List[dict]:
 
 def find_zones(client: "OpenRGBClient", zone_key: str) -> List[dict]:
     """
-    Match zone_key against known keywords, or match directly against zone/device names.
-    Returns a list of matching zone dicts.  'all' returns everything.
+    Match zone_key against:
+      - 'all'                  → every zone
+      - known keyword          → keyboard, logo, lightbar, laptop, etc.
+      - numeric index          → '5'      (single zone by --list-zones row number)
+      - numeric range          → '2-21'   (inclusive range of row numbers)
+      - comma list of indices  → '2,5,7'  (specific row numbers)
+      - raw substring          → 'Dell G' (matched against device+zone name)
     """
     all_zones = list_all_zones(client)
 
     if zone_key.lower() == "all":
         return all_zones
 
+    # ── numeric index / range / comma list ──
+    # e.g. "5", "2-21", "2,5,7"
+    numeric_clean = zone_key.strip()
+    indices: Optional[List[int]] = None
+
+    if re.fullmatch(r"\d+", numeric_clean):
+        indices = [int(numeric_clean)]
+    elif re.fullmatch(r"\d+-\d+", numeric_clean):
+        start, end = numeric_clean.split("-")
+        indices = list(range(int(start), int(end) + 1))
+    elif re.fullmatch(r"\d+(,\d+)+", numeric_clean):
+        indices = [int(x) for x in numeric_clean.split(",")]
+
+    if indices is not None:
+        matched = [z for i, z in enumerate(all_zones) if i in indices]
+        return matched
+
+    # ── keyword or substring match ──
     keywords = ZONE_KEYWORDS.get(zone_key.lower())
     if keywords is None:
-        # Treat as a raw substring match
         keywords = [zone_key.lower()]
 
     matched = []

@@ -114,16 +114,37 @@ alienware-rgb --host 192.168.1.10 --port 6742 --zone all --color 00FF00
 
 ## Zones
 
-| Keyword    | Matches (case-insensitive substring)      |
-|------------|-------------------------------------------|
-| `keyboard` | keyboard, kbd                             |
-| `logo`     | logo, alien, lid                          |
-| `lightbar` | lightbar, light bar, bar, chassis         |
-| `power`    | power                                     |
-| `touchpad` | touchpad, touch pad                       |
-| `all`      | every zone on every detected device       |
+| Keyword    | Matches (case-insensitive substring)           |
+|------------|------------------------------------------------|
+| `keyboard` | keyboard, kbd                                  |
+| `logo`     | logo, alien, lid                               |
+| `lightbar` | lightbar, light bar, bar, chassis              |
+| `power`    | power                                          |
+| `touchpad` | touchpad, touch pad                            |
+| `laptop`   | dell g series, dell g-series, alienware led    |
+| `all`      | every zone on every detected device            |
 
-You can also pass any custom substring (e.g. `--zone "Zone 3"`) to match directly against zone/device names shown in `--list-zones`.
+You can also pass:
+- A **custom substring** — `--zone "Dell G"` matches anything with that string in the device/zone name
+- A **row number** from `--list-zones` — `--zone 5` targets that exact zone
+- A **range** — `--zone 2-21` targets rows 2 through 21 inclusive
+- A **comma list** — `--zone 2,5,7` targets those specific rows
+
+### OpenRGB shows zones as "Unknown"?
+
+On some systems (including the AlienWare x17 R1), OpenRGB identifies the lighting controller as **"Dell G Series LED Controller"** but can't name individual zones — they all appear as "Unknown". This is normal. Use these workarounds:
+
+```bash
+# Target all laptop zones (excludes USB peripherals like mice)
+python gpu_monitor.py --zone laptop --gpu nvidia
+
+# Or target all zones by row range (check your own --list-zones output first)
+python gpu_monitor.py --zone 2-21 --gpu nvidia
+
+# Experiment with a single zone to identify what it controls
+python alienware_rgb.py --zone 5 --color red
+python alienware_rgb.py --zone 5 --color off
+```
 
 ---
 
